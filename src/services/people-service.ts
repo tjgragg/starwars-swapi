@@ -6,6 +6,7 @@ export default class PeopleService {
 
     async find(params: any) {
         if (!this.people.length) {
+            console.log("no cache. Getting full list")
             this.people = await getResourceList("people")
         }
         if (params) {
@@ -15,7 +16,10 @@ export default class PeopleService {
                 const queryResults = this.queries[name] || this.people.filter((person: Person) => {
                     return person.name.includes(name);
                 }).map((person) => person);
-                this.queries[name] = queryResults;
+
+                if (queryResults) {
+                    this.queries[name] = queryResults;
+                }
                 return queryResults;
             }
         }

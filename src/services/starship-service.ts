@@ -1,8 +1,9 @@
-import { getResourceList } from "./https-service";
-import PeopleService  from "./people-service";
+import { getResourceList, sendRequest } from "./https-service";
+import PeopleService, { Person } from "./people-service";
 
 export default class StarshipService {
     starships: Starship[] = [];
+    byPilot: Record<string, Starship[]> = {};
 
     constructor(private peopleService: PeopleService) {
     }
@@ -12,14 +13,27 @@ export default class StarshipService {
             this.starships = await getResourceList("starships");
         }
         if (params) {
+            console.log('params', params);
             const name = params.query?.pilot
             if (name) {
-                // go find people.. this will return people with starship urls. :/
-                const people = await this.peopleService.find({name})
+                return this.byPilot[name] || await this.findByPilot(name);
             }
-            console.log('params', params);
         }
         return this.starships;
+    }
+    async findByPilot(name: string) {
+        if (this.byPilot[name]) return this.byPilot[name];
+
+        const people: Person[] = await this.peopleService.find({query: { name }});
+        const starships: Starship[] = [];
+        for (const person of people) {
+            for (const url of person.starships) {
+                const res = await sendRequest(url);
+                starships.push(await res.json())
+            }
+        }
+        this.byPilot[name] = starships;
+        return starships;
     }
 }
 

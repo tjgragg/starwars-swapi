@@ -11,8 +11,8 @@ export const getResourceList = async (resourceName: string) => {
     let res = await first.json();
     const list = res.results;
     while (res.next) {
-        const httpres = await sendRequest(res.next);
-        res = await httpres.json();
+        const nextRes = await sendRequest(res.next);
+        res = await nextRes.json();
         list.push(...res.results);
     }
     return list;
