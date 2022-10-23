@@ -1,8 +1,8 @@
 import { getResourceList } from "./https-service";
-import { Starship } from "./starship-service";
 
 export default class PeopleService {
-    people: any[] = [];
+    people: Person[] = [];
+    queries: Record<string, Person[]> = {};
 
     async find(params: any) {
         if (!this.people.length) {
@@ -10,6 +10,14 @@ export default class PeopleService {
         }
         if (params) {
             console.log('params', params);
+            const name = params.query?.name;
+            if (name) {
+                const queryResults = this.queries[name] || this.people.filter((person: Person) => {
+                    return person.name.includes(name);
+                }).map((person) => person);
+                this.queries[name] = queryResults;
+                return queryResults;
+            }
         }
         return this.people;
     }
@@ -25,10 +33,10 @@ export interface Person {
     mass: string // -- The mass of the person in kilograms.
     skin_color: string // -- The skin color of this person.
     homeworld: string // -- The URL of a planet resource, a planet that this person was born on or inhabits.
-    films: [] // -- An array of film resource URLs that this person has been in.
-    species: [] // -- An array of species resource URLs that this person belongs to.
-    starships: Starship[] // -- An array of starship resource URLs that this person has piloted.
-    vehicles: [] // -- An array of vehicle resource URLs that this person has piloted.
+    films: string[] // -- An array of film resource URLs that this person has been in.
+    species: string[] // -- An array of species resource URLs that this person belongs to.
+    starships: string[] // -- An array of starship resource URLs that this person has piloted.
+    vehicles: string[] // -- An array of vehicle resource URLs that this person has piloted.
     url: string // -- the hypermedia URL of this resource.
     created: string // -- the ISO 8601 date format of the time that this resource was created.
     edited: string // -- the ISO 8601 date format of the time that this resource was edited.

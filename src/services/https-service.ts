@@ -7,7 +7,7 @@ export const sendRequest = async (url: string) => {
 
 const BASE_URL = "https://swapi.dev/api";
 export const getResourceList = async (resourceName: string) => {
-    const first = await fetch(`${BASE_URL}/${resourceName}`);
+    const first = await sendRequest(`${BASE_URL}/${resourceName}`);
     let res = await first.json();
     const list = res.results;
     while (res.next) {
