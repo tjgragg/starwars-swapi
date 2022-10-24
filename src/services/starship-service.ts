@@ -1,28 +1,26 @@
+import { CacheService } from "./cache-service";
 import { getResourceList, sendRequest } from "./https-service";
 import PeopleService, { Person } from "./people-service";
 
 export default class StarshipService {
-    starships: Starship[] = [];
-    byPilot: Record<string, Starship[]> = {};
-
-    constructor(private peopleService: PeopleService) {
+    constructor(private cacheService: CacheService, private peopleService: PeopleService) {
     }
 
     async find(params: any) {
-        if (!this.starships.length) {
-            this.starships = await getResourceList("starships");
+        if (!this.cacheService.starships.length) {
+            this.cacheService.starships = await getResourceList("starships");
         }
         if (params) {
             console.log('params', params);
             const name = params.query?.pilot
             if (name) {
-                return this.byPilot[name] || await this.findByPilot(name);
+                return this.cacheService.byPilot[name] || await this.findByPilot(name);
             }
         }
-        return this.starships;
+        return this.cacheService.starships;
     }
     async findByPilot(name: string) {
-        if (this.byPilot[name]) return this.byPilot[name];
+        if (this.cacheService.byPilot[name]) return this.cacheService.byPilot[name];
 
         const people: Person[] = await this.peopleService.find({query: { name }});
         const starships: Starship[] = [];
@@ -32,7 +30,7 @@ export default class StarshipService {
                 starships.push(await res.json())
             }
         }
-        this.byPilot[name] = starships;
+        this.cacheService.byPilot[name] = starships;
         return starships;
     }
 }

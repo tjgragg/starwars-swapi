@@ -1,9 +1,12 @@
+import { CacheService } from "../src/services/cache-service";
 import PeopleService from "../src/services/people-service";
 import { people } from "./test-people-data";
 
+// TODO could also mock the https-service instead of initializing people.
 describe("people-service", () => {
-    const peopleService = new PeopleService();
-    peopleService.people = people;
+    const cacheService = new CacheService();
+    cacheService.people = people;
+    const peopleService = new PeopleService(cacheService);
     test("no params", async () => {
         expect(await peopleService.find({})).toEqual(people)
     });

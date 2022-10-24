@@ -1,6 +1,7 @@
 import { feathers } from '@feathersjs/feathers'
 import { koa, rest, bodyParser, errorHandler } from '@feathersjs/koa'
 import serveStatic from 'koa-static'
+import { CacheService } from "./services/cache-service";
 import PeopleService from "./services/people-service";
 import StarshipService from "./services/starship-service";
 
@@ -23,9 +24,10 @@ app.use(bodyParser())
 // Register REST service handler
 app.configure(rest())
 // Register our services
-const peopleService = new PeopleService();
+const cacheService = new CacheService();
+const peopleService = new PeopleService(cacheService);
 app.use('people', peopleService)
-app.use('starships', new StarshipService(peopleService))
+app.use('starships', new StarshipService(cacheService, peopleService))
 
 // Start the server
 app.listen(3030).then(() => console.log('Feathers server listening on localhost:3030'))

@@ -1,29 +1,31 @@
+import { CacheService } from "./cache-service";
 import { getResourceList } from "./https-service";
 
 export default class PeopleService {
-    people: Person[] = [];
-    queries: Record<string, Person[]> = {};
+    constructor(private cacheService: CacheService) {
+        console.log('people service constructor');
+    }
 
     async find(params: any) {
-        if (!this.people.length) {
+        if (!this.cacheService.people.length) {
             console.log("no cache. Getting full list")
-            this.people = await getResourceList("people")
+            this.cacheService.people = await getResourceList("people");
         }
         if (params) {
             console.log('params', params);
             const name = params.query?.name;
             if (name) {
-                const queryResults = this.queries[name] || this.people.filter((person: Person) => {
+                const queryResults = this.cacheService.queries[name] || this.cacheService.people.filter((person: Person) => {
                     return person.name.includes(name);
                 }).map((person) => person);
 
                 if (queryResults) {
-                    this.queries[name] = queryResults;
+                    this.cacheService.queries[name] = queryResults;
                 }
                 return queryResults;
             }
         }
-        return this.people;
+        return this.cacheService.people;
     }
 }
 
