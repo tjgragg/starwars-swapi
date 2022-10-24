@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "start:dev": "nodemon dist/src/app.js",
+    "test": "jest",
+    "watch": "npx tsc -w"
   },
   "keywords": [],
   "author": "",

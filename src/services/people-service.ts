@@ -1,15 +1,18 @@
+import { calculateTime } from "../utils";
 import { CacheService } from "./cache-service";
 import { getResourceList } from "./https-service";
 
 export default class PeopleService {
     constructor(private cacheService: CacheService) {
-        console.log('people service constructor');
     }
 
     async find(params: any) {
+        console.log('people service find')
         if (!this.cacheService.people.length) {
             console.log("no cache. Getting full list")
+            const startTime = Date.now();
             this.cacheService.people = await getResourceList("people");
+            calculateTime(`${ PeopleService.name }-find-duration`, startTime);
         }
         if (params) {
             console.log('params', params);

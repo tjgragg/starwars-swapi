@@ -1,3 +1,4 @@
+import { calculateTime } from "../utils";
 import { CacheService } from "./cache-service";
 import { getResourceList, sendRequest } from "./https-service";
 import PeopleService, { Person } from "./people-service";
@@ -7,8 +8,11 @@ export default class StarshipService {
     }
 
     async find(params: any) {
+        console.log('starship service find')
         if (!this.cacheService.starships.length) {
+            const startTime = Date.now();
             this.cacheService.starships = await getResourceList("starships");
+            calculateTime(`${ StarshipService.name }-find-duration:`, startTime);
         }
         if (params) {
             console.log('params', params);
@@ -19,10 +23,14 @@ export default class StarshipService {
         }
         return this.cacheService.starships;
     }
+
     async findByPilot(name: string) {
+        console.log('starship service findByPilot')
+        const startTime = Date.now();
+
         if (this.cacheService.byPilot[name]) return this.cacheService.byPilot[name];
 
-        const people: Person[] = await this.peopleService.find({query: { name }});
+        const people: Person[] = await this.peopleService.find({ query: { name } });
         const starships: Starship[] = [];
         for (const person of people) {
             for (const url of person.starships) {
@@ -31,6 +39,7 @@ export default class StarshipService {
             }
         }
         this.cacheService.byPilot[name] = starships;
+        calculateTime(`${ StarshipService.name }-findByPilot-duration`, startTime);
         return starships;
     }
 }
